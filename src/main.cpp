@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+
 // #define ACCEL_PIN 
 // #define TEMP_PIN
 
@@ -11,8 +12,9 @@ int BPM = 0;
 int beatCount = 0;
 bool startMonitor = false;
 const int monitoringPeriod = 10000;
+int threshold = 0;
 
-void setup() {
+void setup(){
   Serial.begin(9600);
   delay(1000);
   
@@ -21,28 +23,29 @@ void setup() {
   Serial.println("Pulse sensor connected!"); 
   Serial.println("Calibrating pulse sensor...");
 
-  long sum = 0;
+  int reading = 0;
   const int numReadings = 100;
-
-  for (int i = 0; i < numReadings; i++){   // Take avg pulse rate w/o finger
-      sum += analogRead(HEART_PIN);
-      delay(2);
+  int min = 4095;
+  int max  = 0;
+  int desired = millis() + 2000;
+  //for (int i = 0; i < numReadings; i++){   // Take avg pulse rate w/o finger
+  while (millis() < desired){
+      reading = analogRead(HEART_PIN);
+      if (reading < min){
+        min = reading;
+      }
+      if (reading > max){
+        max = reading;
+      }
   }
-
-  int basePulse = sum / numReadings;
-  
-  Serial.print("Baseline: ");
-  Serial.println(basePulse);
-
-  offset = basePulse + 50; // Offset to avoid noise
-  Serial.print("Offset: ");
-  Serial.println(offset);
-
+  threshold = ((max - min) / 2) + min;
+  Serial.print("Threshold:");
+  Serial.println(threshold);
   Serial.println("Calibration complete.");
   Serial.println("Place finger on sensor. Monitoring will begin in 10 seconds.");
 }
 
-void loop() {
+void loop(){
   static unsigned long startTime = millis(); // Time when monitoring started
   static int heartSignal1 = 0;              // Previous signal value
   static int heartSignal2 = 0;              // Current signal value
@@ -63,24 +66,15 @@ void loop() {
     if (currTime - lastSampleTime >= 2) {
       lastSampleTime = currTime;
 
-      heartSignal1 = heartSignal2;
-      heartSignal2 = analogRead(HEART_PIN);
+      heartSignal1 = analogRead(HEART_PIN);
 
       // Debug output
       Serial.print("HeartSignal1: ");
       Serial.print(heartSignal1);
-      Serial.print(" | HeartSignal2: ");
-      Serial.print(heartSignal2);
-      Serial.print(" | Delta: ");
-      Serial.print(abs(heartSignal1 - heartSignal2));
-      Serial.print(" | LastBeatTime: ");
-      Serial.print(lastBeatTime);
-      Serial.print(" | CurrTime: ");
-      Serial.print(currTime);
       Serial.print(" | BeatCount: ");
       Serial.println(beatCount);
 
-      if (abs(heartSignal1 - heartSignal2) > 55 && (currTime - lastBeatTime > 300)) {
+      if ((heartSignal1 >= threshold) && (currTime - lastBeatTime > 300)) {
         lastBeatTime = currTime;
         beatCount++;
         Serial.println("Heartbeat detected!");
@@ -88,7 +82,7 @@ void loop() {
     }
 
     if (currTime - startTime >= monitoringPeriod) {
-      BPM = (beatCount * 60) / (monitoringPeriod / 1000);
+      BPM = beatCount * 6;
 
       Serial.print("Total Beats: ");
       Serial.println(beatCount);
