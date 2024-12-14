@@ -20,4 +20,4 @@ def update_step():
         stats["temp"] = temp
     else:
         temp = stats["temp"]
-    return jsonify({"message": "Data updated successfully", "temp": temp, "steps": bpm})
+    return jsonify({"message": "Data updated successfully", "temp": temp, "bpm": bpm})
