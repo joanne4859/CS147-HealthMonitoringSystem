@@ -4,5 +4,4 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    render_template("index.html", result = request.args.get("var"))
-    print(request.args.get("var"))
+    return render_template("index.html", result = [request.args.get("temp"), request.args.get("steps")])

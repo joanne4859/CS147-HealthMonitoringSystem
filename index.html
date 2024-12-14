@@ -11,26 +11,14 @@
 </head>
 
 <body id="body">
-    <div id="respiratory">
-        <h2>Respiratory Rate</h2>
-        <p></p>
+    <div id="steps">
+        <h2>Steps</h2>
+        <p>You have taken {{ result[1] }} steps! Keep going!</p>
     </div>
 
     <div id="temperaure">
-        <h2>Internal Temperature</h2>
-        <p></p>
-    </div>
-    <div>
-        <table> 
-            {% for key, value in result.items() %} 
-            
-                <tr> 
-                <th> {{ key }} </th> 
-                <td> {{ value }} </td> 
-                </tr> 
-                
-            {% endfor %} 
-        </table> 
+        <h2>Temperature</h2>
+        <p>The temperature is {{ result[0] }}.</p>
     </div>
 </body>
 
