@@ -11,15 +11,35 @@
 </head>
 
 <body id="body">
-    <div id="steps">
-        <h2>Steps</h2>
-        <p>You have taken {{ result[1] }} steps! Keep going!</p>
+    <div id="bpm">
+        <h2>Beats per Min(BPM)</h2>
+        <p>You have a BPM of<span id = "b"></span>! Calm Down!</p>
     </div>
 
     <div id="temperaure">
         <h2>Temperature</h2>
-        <p>The temperature is {{ result[0] }}.</p>
+        <p>The temperature is <span id = "t"></span>celcius</p>
     </div>
+    <script>
+        // Function to fetch the latest step count from the server
+        async function fetchData() {
+            try {
+                const response = await fetch('/update_step');
+                const result = await response.json();
+                
+                if (result.temp !== undefined && result.bpm !== undefined) {
+                    // Update the data in the HTML
+                    document.getElementById('t').innerText = result.temp;
+                    document.getElementById('b').innerText = result.bpm;
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Fetch data every 2 seconds (2000 milliseconds)
+        setInterval(fetchData, 2000);
+    </script>
 </body>
 
 </html>
